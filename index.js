@@ -52,7 +52,7 @@ async function run() {
       const result = await servicesCollection.findOne(query, options);
       res.send(result);
     })
-    
+
     app.post('/bookings', async (req, res) => {
       const service = req.body;
       const result = await bookingCollection.insertOne(service);
@@ -64,6 +64,20 @@ async function run() {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await bookingCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    app.patch('/bookings/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedBooking = req.body;
+      const query = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          status: updatedBooking.status
+        },
+      };
+      const result = await bookingCollection.updateOne(query, updateDoc);
       res.send(result);
     })
 
