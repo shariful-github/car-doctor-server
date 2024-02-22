@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors({
-  origin: ['https://car-doctor-server-gamma-lilac.vercel.app'],
+  origin: ['https://car-doctor-472da.web.app'],
   credentials: true
 }))
 app.use(express.json());
