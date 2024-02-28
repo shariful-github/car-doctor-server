@@ -74,7 +74,10 @@ async function run() {
     const bookingCollection = database.collection('bookings');
 
     app.get('/services', async(req, res) =>{
-      const services = await servicesCollection.find().toArray();
+      const query = {
+        title: {$regex: req.query.searchKey, $options: 'i'}
+      }
+      const services = await servicesCollection.find(query).toArray();
       const sortedServices = services.map(service => (
         //extract all properties of service then create new object and convert price to integer
         {...service, price: parseInt(service.price)} 
