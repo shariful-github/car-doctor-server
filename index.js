@@ -9,8 +9,11 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors({
-  origin: ['https://car-doctor-472da.web.app'],
-  credentials: true
+  origin: [
+    'https://car-doctor-472da.web.app',
+    'http://localhost:5173'
+  ],
+  credentials: true, 
 }))
 app.use(express.json());
 app.use(cookieParser());
@@ -52,11 +55,12 @@ async function run() {
     app.post('/jwt', async(req, res) =>{
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
-      res.cookie('token', token, {httpOnly: true, 
+      res.cookie('token', token, {
+        httpOnly: true, 
         secure: true,
         sameSite: 'none'
       })
-      .send({success: true});
+      .send({checkingtoken: token});
     })
 
     app.post('/logout', async(req, res) =>{
@@ -70,12 +74,17 @@ async function run() {
     const bookingCollection = database.collection('bookings');
 
     app.get('/services', async(req, res) =>{
-      const cursor = servicesCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
+      const services = await servicesCollection.find().toArray();
+      const sortedServices = services.map(service => (
+        //extract all properties of service then create new object and convert price to integer
+        {...service, price: parseInt(service.price)} 
+      ))
+      .sort((a, b) => req.query.sort === 'asc'? a.price - b.price : b.price - a.price);
+      res.send(sortedServices);
     })
 
-    app.get('/bookings', verifyToken,  async (req, res) => {
+    app.get('/bookings', verifyToken, async (req, res) => {
+
       if(req.query?.email !== req.user.email){
         return res.status(403).send({message: 'forbidden access'});
       }
